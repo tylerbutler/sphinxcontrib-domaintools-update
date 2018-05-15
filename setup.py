@@ -1,26 +1,34 @@
 # from aptk.__version__ import release
 import sys, os
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Command
+
+class Version(Command):
+    description = 'Outputs the current version of the package'
+    user_options = []
+    boolean_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        from setuptools_scm import get_version
+
+        print('Current version is: ' + get_version(root='.', relative_to=__file__))
+
+
+sys.path.insert(0, 'sphinxcontrib')
 
 long_desc = '''
 This package contains tools for easy sphinx domain creation.
 '''
 
-try:
-    sys.path.insert(0, 'sphinxcontrib')
-    import domaintools
-except ImportError as e:
-    import logging
-    logging.warning("Unable to import domaintools module.", exc_info=e)
-    class domaintools:
-        __version__ = "unknown"
-
-requires = ['Sphinx>=1.0', 'docutils']
-
 setup(
     name='sphinxcontrib-domaintools',
-    version=domaintools.__version__,
+    use_scm_version=True,
     url='http://bitbucket.org/klorenz/sphinxcontrib-domaintools',
     download_url='http://pypi.python.org/pypi/sphinxcontrib-domaintools',
     license='BSD',
@@ -43,6 +51,10 @@ setup(
     platforms='any',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=requires,
+    install_requires=['Sphinx>=1.0', 'docutils'],
+    setup_requires=['setuptools_scm'],
+    cmdclass={
+        'version': Version
+    },
     namespace_packages=['sphinxcontrib'],
 )
