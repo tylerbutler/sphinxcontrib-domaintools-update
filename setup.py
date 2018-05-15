@@ -7,10 +7,16 @@ long_desc = '''
 This package contains tools for easy sphinx domain creation.
 '''
 
-sys.path.insert(0, 'sphinxcontrib')
-import domaintools
+try:
+    sys.path.insert(0, 'sphinxcontrib')
+    import domaintools
+except ImportError as e:
+    import logging
+    logging.warning("Unable to import domaintools module.", exc_info=e)
+    class domaintools:
+        __version__ = "unknown"
 
-requires = ['Sphinx>=1.0']
+requires = ['Sphinx>=1.0', 'docutils']
 
 setup(
     name='sphinxcontrib-domaintools',
