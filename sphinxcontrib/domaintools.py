@@ -24,7 +24,7 @@ import unicodedata
 
 from docutils import nodes
 
-from sphinx import addnodes
+from sphinx import addnodes, version_info
 from sphinx.roles import XRefRole
 from sphinx.locale import l_, _
 from sphinx.domains import Domain, ObjType
@@ -32,7 +32,7 @@ from sphinx.directives import ObjectDescription
 from sphinx.util import ws_re
 from sphinx.util.nodes import clean_astext, make_refnode
 
-__version__ = '0.1'
+__version__ = '0.1.1'
 
 
 class GenericObject(ObjectDescription):
@@ -75,8 +75,13 @@ class GenericObject(ObjectDescription):
             else:
                 indextype = 'single'
                 indexentry = self.indextemplate % (name,)
-            self.indexnode['entries'].append((indextype, indexentry,
-                                              targetname, ''))
+            append_args = (indextype, indexentry, targetname, '')
+
+            # the format of the arguments changed in Sphinx 1.4
+            if version_info > (1, 4, 0, '', 0):
+                append_args = append_args + (None, )
+
+            self.indexnode['entries'].append(append_args)
         self.env.domaindata[self.domain]['objects'][self.objtype, name] = \
             self.env.docname, targetname
 
