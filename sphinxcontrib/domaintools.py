@@ -24,6 +24,7 @@ import unicodedata
 
 from docutils import nodes
 
+import six
 from sphinx import addnodes, version_info
 from sphinx.roles import XRefRole
 from sphinx.locale import l_, _
@@ -71,7 +72,7 @@ class GenericObject(ObjectDescription):
             colon = self.indextemplate.find(':')
             if colon != -1:
                 indextype = self.indextemplate[:colon].strip()
-                indexentry = self.indextemplate[colon+1:].strip() % (name,)
+                indexentry = self.indextemplate[colon + 1:].strip() % (name,)
             else:
                 indextype = 'single'
                 indexentry = self.indextemplate % (name,)
@@ -79,11 +80,12 @@ class GenericObject(ObjectDescription):
 
             # the format of the arguments changed in Sphinx 1.4
             if version_info > (1, 4, 0, '', 0):
-                append_args = append_args + (None, )
+                append_args = append_args + (None,)
 
             self.indexnode['entries'].append(append_args)
         self.env.domaindata[self.domain]['objects'][self.objtype, name] = \
             self.env.docname, targetname
+
 
 class CustomDomain(Domain):
     """
@@ -103,18 +105,18 @@ class CustomDomain(Domain):
     }
 
     initial_data = {
-        'objects': {},      # (type, name) -> docname, labelid
+        'objects': {},  # (type, name) -> docname, labelid
     }
 
     dangling_warnings = {
     }
 
     def clear_doc(self, docname):
-      if 'objects' in self.data:
-       
-        for key, (fn, _) in self.data['objects'].items():
-            if fn == docname:
-                del self.data['objects'][key]
+        if 'objects' in self.data:
+
+            for key, (fn, _) in self.data['objects'].items():
+                if fn == docname:
+                    del self.data['objects'][key]
 
     def resolve_xref(self, env, fromdocname, builder,
                      typ, target, node, contnode):
@@ -131,7 +133,7 @@ class CustomDomain(Domain):
                             labelid, contnode)
 
     def get_objects(self):
-        for (type, name), info in self.data['objects'].iteritems():
+        for (type, name), info in six.iteritems(self.data['objects']):
             yield (name, name, type, info[0], info[1],
                    self.object_types[type].attrs['searchprio'])
 
@@ -140,8 +142,8 @@ class CustomDomain(Domain):
         return type.lname
 
 
-def custom_domain(class_name, name='', label='', elements = {}):
-    '''create a custom domain
+def custom_domain(class_name, name='', label='', elements={}):
+    """create a custom domain
 
     For each given element there are created a directive and a role
     for referencing and indexing.
@@ -171,28 +173,27 @@ def custom_domain(class_name, name='', label='', elements = {}):
         - `ref_nodeclass` - class passed as XRefRole's innernodeclass,
           defaults to `None`.
 
-    '''
+    """
     domain_class = type(class_name, (CustomDomain, object), dict(
-        name  = name,
-        label = label,
+        name=name,
+        label=label,
     ))
 
     domain_object_class = \
-        type("%s_Object"%name, (GenericObject, object), dict(domain=name))
+        type("%s_Object" % name, (GenericObject, object), dict(domain=name))
 
-    for n,e in elements.items():
+    for n, e in elements.items():
         obj_name = e.get('objname', n)
         domain_class.object_types[n] = ObjType(
-            obj_name, e.get('role', n) )
+            obj_name, e.get('role', n))
 
         domain_class.directives[n] = type(n, (domain_object_class, object), dict(
-            indextemplate   = e.get('indextemplate', 'pair: %%s; %s' % obj_name),
-            parse_node      = staticmethod(e.get('parse', None)),
-            doc_field_types = e.get('fields', []),
-            ))
+            indextemplate=e.get('indextemplate', 'pair: %%s; %s' % obj_name),
+            parse_node=staticmethod(e.get('parse', None)),
+            doc_field_types=e.get('fields', []),
+        ))
 
         domain_class.roles[e.get('role', n)] = XRefRole(innernodeclass=
-            e.get('ref_nodeclass', None))
+                                                        e.get('ref_nodeclass', None))
 
     return domain_class
-

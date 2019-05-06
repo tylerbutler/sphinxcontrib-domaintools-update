@@ -1,7 +1,8 @@
 # from aptk.__version__ import release
-import sys, os
+import sys
 
 from setuptools import setup, find_packages, Command
+
 
 class Version(Command):
     description = 'Outputs the current version of the package'
