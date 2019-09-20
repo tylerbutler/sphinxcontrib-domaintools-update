@@ -113,10 +113,12 @@ class CustomDomain(Domain):
 
     def clear_doc(self, docname):
         if 'objects' in self.data:
-
+            to_delete = list()
             for key, (fn, _) in self.data['objects'].items():
                 if fn == docname:
-                    del self.data['objects'][key]
+                    to_delete.append(key)
+            for key in to_delete:
+                del self.data['objects'][key]
 
     def resolve_xref(self, env, fromdocname, builder,
                      typ, target, node, contnode):
